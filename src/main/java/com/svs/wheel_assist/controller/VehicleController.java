@@ -42,12 +42,13 @@ public class VehicleController {
     @PutMapping("/{vehicleId}")
     public ResponseEntity<VehicleResponseDTO> updateVehicle(
             @PathVariable Long vehicleId, @Valid @RequestBody VehicleDTO dto) {
-        return ResponseEntity.ok(vehicleService.updateVehicle(vehicleId, dto));
+        return ResponseEntity.ok(vehicleService.updateVehicle(vehicleId, dto)); // fully updates the vehicle
     }
 
     @DeleteMapping("/delete/{vehicleId}")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long vehicleId) {
         vehicleService.deleteVehicle(vehicleId);
         return ResponseEntity.noContent().build();
+        // deletes the vehicle
     }
 }
