@@ -39,13 +39,13 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.getVehiclesByUser(userId));
     }
 
-    @PutMapping("/{vehicleId}")
+    @PutMapping("/{vehicleId}")        // updates the entire vehicle
     public ResponseEntity<VehicleResponseDTO> updateVehicle(
             @PathVariable Long vehicleId, @Valid @RequestBody VehicleDTO dto) {
         return ResponseEntity.ok(vehicleService.updateVehicle(vehicleId, dto));
     }
 
-    @DeleteMapping("/delete/{vehicleId}")
+    @DeleteMapping("/delete/{vehicleId}") // deletes the endtire vehicle 
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long vehicleId) {
         vehicleService.deleteVehicle(vehicleId);
         return ResponseEntity.noContent().build();
