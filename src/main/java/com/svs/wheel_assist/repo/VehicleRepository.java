@@ -1,4 +1,4 @@
-package com.svs.wheel_assist.repository;
+package com.svs.wheel_assist.repo;
 
 import com.svs.wheel_assist.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
