@@ -25,9 +25,7 @@ public class UserServiceImpl implements UserService {
     private final MechanicRepository mechanicRepository;
 
     // NOTE: password is stored as plain text for now since we're
-    // skipping Spring Security/JWT in this pass. Before you wire
-    // security back in, replace this with a PasswordEncoder --
-    // do not ship this as-is.
+    // skipping Spring Security/JWT in this pass.
 
     @Override
     @Transactional
