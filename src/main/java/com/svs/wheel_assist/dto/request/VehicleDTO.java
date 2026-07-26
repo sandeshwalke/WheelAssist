@@ -18,9 +18,7 @@ import lombok.Setter;
 @Builder
 public class VehicleDTO {
 
-    // Owner is not taken from the client body once auth is wired
-    // back in -- it'll come from the JWT instead. For now, while
-    // security is paused, the client passes it explicitly.
+
     @NotNull(message = "User id is required")
     private Long userId;
 
