@@ -1,4 +1,4 @@
-package com.svs.wheel_assist.service;
+package com.svs.wheel_assist.service.impli;
 
 import com.svs.wheel_assist.dto.request.VehicleDTO;
 import com.svs.wheel_assist.dto.response.VehicleResponseDTO;
