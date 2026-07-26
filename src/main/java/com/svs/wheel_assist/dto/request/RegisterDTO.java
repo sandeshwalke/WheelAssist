@@ -36,7 +36,6 @@ public class RegisterDTO {
     private String password;
 
     // Only CUSTOMER or MECHANIC allowed from this endpoint --
-    // service layer rejects ADMIN even if sent
     @NotNull(message = "Role is required")
     private Role role;
 

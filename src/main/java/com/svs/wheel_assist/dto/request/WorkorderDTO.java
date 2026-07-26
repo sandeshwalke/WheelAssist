@@ -14,11 +14,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class WorkorderDTO {
-
-    // No userId field here at all -- the owner is derived from the
-    // JWT (SecurityContextHolder), never taken from the client.
-    // vehicleId is still client-supplied, but the service verifies
-    // it actually belongs to the caller before creating anything.
     @NotNull(message = "Vehicle id is required")
     private Long vehicleId;
 
