@@ -11,6 +11,7 @@ import com.svs.wheel_assist.repo.UserRepository;
 import com.svs.wheel_assist.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final MechanicRepository mechanicRepository;
-
-    // NOTE: password is stored as plain text for now since we're
-    // skipping Spring Security/JWT in this pass.
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -47,7 +46,7 @@ public class UserServiceImpl implements UserService {
                 .name(dto.getName())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
-                .password(dto.getPassword())
+                .password(passwordEncoder.encode(dto.getPassword())) // hashed now, not plain text
                 .role(dto.getRole())
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -94,10 +93,6 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    // Shared mapper -- if experience/specialization aren't passed in
-    // (null, null), it looks them up itself when the user is a
-    // MECHANIC. Used by register (which already has the values on
-    // hand), getUserById, and getAllUsers.
     private UserResponseDTO toResponseDTO(User user, String experience, String specialization) {
 
         if (user.getRole() == Role.MECHANIC && experience == null && specialization == null) {

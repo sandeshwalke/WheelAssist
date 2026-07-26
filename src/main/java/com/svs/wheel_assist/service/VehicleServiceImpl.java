@@ -6,8 +6,12 @@ import com.svs.wheel_assist.entity.User;
 import com.svs.wheel_assist.entity.Vehicle;
 import com.svs.wheel_assist.repo.UserRepository;
 import com.svs.wheel_assist.repo.VehicleRepository;
+import com.svs.wheel_assist.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,9 +66,27 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public List<VehicleResponseDTO> getVehiclesByUser(Long userId) {
+        // Ownership check: the authenticated caller must either BE
+        // this user, or be a MECHANIC (staff can look up any
+        // customer's vehicles). A customer requesting someone
+        // else's userId is rejected here, regardless of what the
+        // URL says -- the token is the source of truth, not the
+        // path variable.
+        String callerEmail = getAuthenticatedEmail();
+        User caller = userRepository.findByEmail(callerEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+
+        boolean isSelf = caller.getUserId().equals(userId);
+        boolean isMechanic = caller.getRole().name().equals("MECHANIC");
+
+        if (!isSelf && !isMechanic) {
+            throw new AccessDeniedException("You can only view your own vehicles");
+        }
+
         if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException("User not found with id: " + userId);
         }
+
         return vehicleRepository.findByUserUserId(userId)
                 .stream()
                 .map(this::toResponseDTO)
@@ -77,8 +99,6 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle not found with id: " + vehicleId));
 
-        // If the plate is being changed, make sure the new one isn't
-        // already taken by a different vehicle
         if (!vehicle.getVehiclePlate().equals(dto.getVehiclePlate())
                 && vehicleRepository.existsByVehiclePlate(dto.getVehiclePlate())) {
             throw new IllegalArgumentException("Vehicle plate already registered: " + dto.getVehiclePlate());
@@ -101,6 +121,11 @@ public class VehicleServiceImpl implements VehicleService {
             throw new EntityNotFoundException("Vehicle not found with id: " + vehicleId);
         }
         vehicleRepository.deleteById(vehicleId);
+    }
+
+    private String getAuthenticatedEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
     }
 
     private VehicleResponseDTO toResponseDTO(Vehicle vehicle) {
