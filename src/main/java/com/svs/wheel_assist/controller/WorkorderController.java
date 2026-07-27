@@ -39,16 +39,17 @@ public class WorkorderController {
     public ResponseEntity<List<WorkorderResponseDTO>> getUnassignedWorkorders() {
         return ResponseEntity.ok(workorderService.getUnassignedWorkorders());
     }
+    @PutMapping("/{workorderId}/status")
+    public ResponseEntity<WorkorderResponseDTO> updateStatus(
+            @PathVariable Long workorderId, @Valid @RequestBody WorkorderStatusDTO dto) {
+        return ResponseEntity.ok(workorderService.updateStatus(workorderId, dto));
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<WorkorderResponseDTO>> getWorkordersByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(workorderService.getWorkordersByUser(userId));
     }
     
-    @PutMapping("/{workorderId}/status")
-    public ResponseEntity<WorkorderResponseDTO> updateStatus(
-            @PathVariable Long workorderId, @Valid @RequestBody WorkorderStatusDTO dto) {
-        return ResponseEntity.ok(workorderService.updateStatus(workorderId, dto));
+    
 
     @GetMapping("/mechanic/{mechanicId}")
     public ResponseEntity<List<WorkorderResponseDTO>> getWorkordersByMechanic(@PathVariable Long mechanicId) {
