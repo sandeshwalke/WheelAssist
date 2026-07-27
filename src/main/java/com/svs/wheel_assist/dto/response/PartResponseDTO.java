@@ -15,13 +15,12 @@ import java.math.BigDecimal;
 @Builder
 public class PartResponseDTO {
 
+    private BigDecimal lineTotal;  // Convenience field, computed as quantity * unitPrice -- saves  and the frontend from redoing this math for every row
+
+    
     private Long partId;
     private Long jobId;
     private String partName;
     private Integer quantity;
     private BigDecimal unitPrice;
-
-    // Convenience field, computed as quantity * unitPrice -- saves
-    // the frontend from redoing this math for every row
-    private BigDecimal lineTotal;
 }
