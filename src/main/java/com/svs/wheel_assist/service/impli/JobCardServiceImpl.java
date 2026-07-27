@@ -70,10 +70,10 @@ public class JobCardServiceImpl implements JobCardService {
     }
 
     @Override
-    public JobCardResponseDTO getJobCardByWorkorder(Long workorderId) {
+    public JobCardResponseDTO getJobCardByWorkorder (Long workorderId) 
+    {
         JobCard jobCard = jobCardRepository.findByWorkorderWorkorderId(workorderId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "No job card found for workorder id: " + workorderId));
+                .orElseThrow(() -> new EntityNotFoundException("No job card found here for workorder id: " + workorderId));
         return toResponseDTO(jobCard);
     }
 
