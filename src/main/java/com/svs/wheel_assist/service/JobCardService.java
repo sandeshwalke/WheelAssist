@@ -13,8 +13,10 @@ public interface JobCardService {
     JobCardResponseDTO getJobCardById(Long jobId);
 
     JobCardResponseDTO getJobCardByWorkorder(Long workorderId);
+    
+    JobCardResponseDTO updateJobCard(Long jobId, JobCardUpdateDTO dto);
 
     List<JobCardResponseDTO> getAllJobCards();
+    
 
-    JobCardResponseDTO updateJobCard(Long jobId, JobCardUpdateDTO dto);
 }
