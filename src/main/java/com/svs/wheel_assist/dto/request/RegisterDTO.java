@@ -40,8 +40,7 @@ public class RegisterDTO {
     private Role role;
 
     // Required only when role = MECHANIC -- checked manually in
-    // the service layer, not here, since validation can't be
-    // conditional on another field with plain annotations
+
     private String experience;
 
     private String specialization;
