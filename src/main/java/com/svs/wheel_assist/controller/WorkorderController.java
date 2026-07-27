@@ -20,46 +20,53 @@ public class WorkorderController {
     private final WorkorderService workorderService;
 
     @PostMapping("/add")
-    public ResponseEntity<WorkorderResponseDTO> createWorkorder(@Valid @RequestBody WorkorderDTO dto) {
+    public ResponseEntity<WorkorderResponseDTO> createWorkorder(@Valid @RequestBody WorkorderDTO dto)
+    {
         WorkorderResponseDTO response = workorderService.createWorkorder(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{workorderId}")
-    public ResponseEntity<WorkorderResponseDTO> getWorkorder(@PathVariable Long workorderId) {
+    public ResponseEntity<WorkorderResponseDTO> getWorkorder(@PathVariable Long workorderId)
+    {
         return ResponseEntity.ok(workorderService.getWorkorderById(workorderId));
     }
 
     @GetMapping("/getall")
-    public ResponseEntity<List<WorkorderResponseDTO>> getAllWorkorders() {
+    public ResponseEntity<List<WorkorderResponseDTO>> getAllWorkorders()
+    {
         return ResponseEntity.ok(workorderService.getAllWorkorders());
     }
 
     @GetMapping("/unassigned")
-    public ResponseEntity<List<WorkorderResponseDTO>> getUnassignedWorkorders() {
+    public ResponseEntity<List<WorkorderResponseDTO>> getUnassignedWorkorders()
+    {
         return ResponseEntity.ok(workorderService.getUnassignedWorkorders());
     }
     @PutMapping("/{workorderId}/status")
     public ResponseEntity<WorkorderResponseDTO> updateStatus(
-            @PathVariable Long workorderId, @Valid @RequestBody WorkorderStatusDTO dto) {
+            @PathVariable Long workorderId, @Valid @RequestBody WorkorderStatusDTO dto)
+    {
         return ResponseEntity.ok(workorderService.updateStatus(workorderId, dto));
+    }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<WorkorderResponseDTO>> getWorkordersByUser(@PathVariable Long userId) {
+    public ResponseEntity<List<WorkorderResponseDTO>> getWorkordersByUser(@PathVariable Long userId)
+    {
         return ResponseEntity.ok(workorderService.getWorkordersByUser(userId));
     }
     
     
 
     @GetMapping("/mechanic/{mechanicId}")
-    public ResponseEntity<List<WorkorderResponseDTO>> getWorkordersByMechanic(@PathVariable Long mechanicId) {
+    public ResponseEntity<List<WorkorderResponseDTO>> getWorkordersByMechanic(@PathVariable Long mechanicId)
+    {
         return ResponseEntity.ok(workorderService.getWorkordersByMechanic(mechanicId));
     }
 
     @PutMapping("/{workorderId}/assign")
-    public ResponseEntity<WorkorderResponseDTO> assignToSelf(@PathVariable Long workorderId) {
+    public ResponseEntity<WorkorderResponseDTO> assignToSelf(@PathVariable Long workorderId)
+    {
         return ResponseEntity.ok(workorderService.assignToSelf(workorderId));
-    }
-
     }
 }
