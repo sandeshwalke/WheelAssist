@@ -1,0 +1,182 @@
+import React, { useState, useEffect } from 'react';
+import { ClipboardList, RefreshCw, Eye, FileText, CheckCircle2, Clock, Wrench, AlertCircle } from 'lucide-react';
+import { workorderApi, jobCardApi } from '../services/api';
+import JobCardViewModal from './JobCardViewModal';
+
+export default function CustomerWorkOrders({ auth }) {
+  const [workorders, setWorkorders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  // Job Card Modal state
+  const [selectedJobCard, setSelectedJobCard] = useState(null);
+  const [jobCardLoading, setJobCardLoading] = useState(false);
+  const [showJobCardModal, setShowJobCardModal] = useState(false);
+
+  const fetchWorkorders = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await workorderApi.getByUser(auth.userId);
+      setWorkorders(data || []);
+    } catch (err) {
+      setError(err.message || 'Failed to fetch work orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkorders();
+
+    // Auto polling every 10 seconds for live status updates
+    const timer = setInterval(() => {
+      fetchWorkorders();
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, [auth]);
+
+  const handleViewJobCard = async (workorderId) => {
+    setJobCardLoading(true);
+    try {
+      const jobCard = await jobCardApi.getByWorkorder(workorderId);
+      setSelectedJobCard(jobCard);
+      setShowJobCardModal(true);
+    } catch (err) {
+      alert('No Job Card generated yet for this work order by the mechanic.');
+    } finally {
+      setJobCardLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827' }}>Work Order Status</h1>
+          <p style={{ color: '#6B7280', fontSize: '0.9rem' }}>Real-time updates on your service & repair jobs</p>
+        </div>
+        <button className="btn-secondary" onClick={fetchWorkorders} disabled={loading}>
+          <RefreshCw size={16} className={loading ? 'spin' : ''} />
+          <span>Refresh Status</span>
+        </button>
+      </div>
+
+      {error && (
+        <div className="alert-box alert-error">
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {loading && workorders.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#6B7280' }}>Loading work orders...</div>
+      ) : workorders.length === 0 ? (
+        <div className="card" style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
+          <div style={{ background: '#FFF3E0', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
+            <ClipboardList size={32} color="#FF5722" />
+          </div>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>No Active Work Orders</h3>
+          <p style={{ color: '#6B7280', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+            You haven't submitted any service requests yet. Use "Book Service" tab to create one.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {workorders.map((wo) => (
+            <div key={wo.workorderId} className="card" style={{ borderLeft: '5px solid #FF5722' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ background: '#111827', color: '#FFFFFF', padding: '0.6rem 0.9rem', borderRadius: '10px', fontWeight: 800, fontSize: '0.95rem' }}>
+                    #{wo.workorderId}
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#111827', margin: 0 }}>
+                      {wo.vehicleModel || 'Vehicle'} ({wo.vehiclePlate || 'N/A'})
+                    </h3>
+                    <p style={{ fontSize: '0.85rem', color: '#6B7280', margin: 0 }}>
+                      Submitted: {wo.createdAt ? new Date(wo.createdAt).toLocaleString() : 'Recently'}
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span className={`status-badge status-${wo.status}`}>
+                    {wo.status}
+                  </span>
+                  
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={() => handleViewJobCard(wo.workorderId)}
+                    disabled={jobCardLoading}
+                  >
+                    <FileText size={16} />
+                    <span>View Job Card & Parts</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Progress Flow Tracker */}
+              <div style={{ background: '#F9FAFB', padding: '1rem 1.25rem', borderRadius: '12px', marginBottom: '1rem', border: '1px solid #E5E7EB' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4B5563', marginBottom: '0.5rem' }}>
+                  Service Progress Stage:
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                  {['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'].map((step, idx) => {
+                    const statusOrder = ['PENDING', 'ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'DELIVERED'];
+                    const currentIdx = statusOrder.indexOf(wo.status);
+                    const isDone = currentIdx >= idx;
+                    const isCurrent = currentIdx === idx;
+
+                    return (
+                      <div key={step} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', flex: 1, zIndex: 2 }}>
+                        <div style={{
+                          width: '26px',
+                          height: '26px',
+                          borderRadius: '50%',
+                          background: isDone ? '#FF5722' : '#E5E7EB',
+                          color: isDone ? '#FFFFFF' : '#9CA3AF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          boxShadow: isCurrent ? '0 0 0 4px rgba(255,87,34,0.2)' : 'none'
+                        }}>
+                          {idx + 1}
+                        </div>
+                        <span style={{ fontSize: '0.7rem', fontWeight: isCurrent ? 700 : 500, color: isCurrent ? '#FF5722' : '#6B7280' }}>
+                          {step.replace('_', ' ')}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ fontSize: '0.9rem', color: '#374151' }}>
+                <strong>Problem Reported:</strong> {wo.problemDescription}
+              </div>
+
+              {wo.mechanicName && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Wrench size={14} color="#FF5722" />
+                  <span>Assigned Mechanic: <strong style={{ color: '#111827' }}>{wo.mechanicName}</strong></span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal to view Job Card details */}
+      {showJobCardModal && selectedJobCard && (
+        <JobCardViewModal
+          jobCard={selectedJobCard}
+          onClose={() => setShowJobCardModal(false)}
+        />
+      )}
+    </div>
+  );
+}
