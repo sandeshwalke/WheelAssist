@@ -18,9 +18,6 @@ export default function CreateWorkOrder({ auth, onWorkorderCreated }) {
       try {
         const data = await vehicleApi.getByUser(auth.userId);
         setVehicles(data || []);
-        if (data && data.length > 0) {
-          setSelectedVehicleId(data[0].vehicleId);
-        }
       } catch (err) {
         setError('Failed to fetch your vehicles. Please register a vehicle first.');
       } finally {
@@ -109,6 +106,7 @@ export default function CreateWorkOrder({ auth, onWorkorderCreated }) {
                 onChange={(e) => setSelectedVehicleId(e.target.value)}
                 required
               >
+                <option value="">-- Choose a Vehicle --</option>
                 {vehicles.map((v) => (
                   <option key={v.vehicleId} value={v.vehicleId}>
                     {v.brand} {v.model} ({v.vehiclePlate}) - {v.vehicleType}
