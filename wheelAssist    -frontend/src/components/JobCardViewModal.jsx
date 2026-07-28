@@ -7,7 +7,7 @@ export default function JobCardViewModal({ jobCard, onClose }) {
   const parts = jobCard.parts || [];
   const partsTotal = parts.reduce((acc, p) => {
     const total = p.lineTotal != null ? parseFloat(p.lineTotal) : (p.quantity * parseFloat(p.unitPrice || 0));
-    return acc + total;
+    return acc + total;  // total for jobcard 
   }, 0);
 
   const laborCost = jobCard.estimatedCost ? parseFloat(jobCard.estimatedCost) : 0;
