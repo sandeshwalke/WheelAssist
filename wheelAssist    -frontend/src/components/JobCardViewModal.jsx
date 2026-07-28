@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Wrench, Package, CheckCircle2, DollarSign, X } from 'lucide-react';
+import { FileText, Wrench, Package, CheckCircle2, X } from 'lucide-react';
 
 export default function JobCardViewModal({ jobCard, onClose }) {
   if (!jobCard) return null;

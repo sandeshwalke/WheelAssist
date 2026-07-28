@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Save, FileText, DollarSign, Wrench, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Package, Plus, Trash2, Save, FileText, Wrench, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { workorderApi, jobCardApi, partApi } from '../services/api';
 
 export default function MechanicJobCardManager({ auth, selectedWorkorder: initialWorkorder }) {
@@ -230,7 +230,7 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
               </div>
 
               <div className="form-group">
-                <label className="form-label">Estimated Labor & Service Cost (₹ / $)</label>
+                <label className="form-label">Estimated Labor & Service Cost (₹)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -289,7 +289,7 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Unit Price (₹ / $)</label>
+                  <label className="form-label">Unit Price (₹)</label>
                   <input
                     type="number"
                     step="0.01"
