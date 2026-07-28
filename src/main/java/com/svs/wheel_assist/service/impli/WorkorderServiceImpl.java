@@ -177,8 +177,12 @@ public class WorkorderServiceImpl implements WorkorderService {
     }
 
     private void validateStatusTransition(WorkorderStatus current, WorkorderStatus next) {
-        if (current == WorkorderStatus.COMPLETED || current == WorkorderStatus.DELIVERED
-                || current == WorkorderStatus.CANCELLED) {
+        // Only DELIVERED and CANCELLED are true dead ends -- nothing
+        // legally follows them. COMPLETED still has one legal forward
+        // move (-> DELIVERED), so it must NOT be in this terminal
+        // list, or that transition gets blocked before it's ever
+        // checked below.
+        if (current == WorkorderStatus.DELIVERED || current == WorkorderStatus.CANCELLED) {
             throw new IllegalStateException("Cannot change status once a workorder is " + current);
         }
 

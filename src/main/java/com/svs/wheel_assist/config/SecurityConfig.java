@@ -46,42 +46,29 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    // Once Spring Security is active, CORS must be configured through
-    // Security's own chain (.cors()) -- a separate WebMvcConfigurer
-    // CorsConfig bean is no longer sufficient on its own. This
-    // replaces the standalone CorsConfig.java.
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:5174",
-                "http://localhost:5175"
-        ));
+        // Allow all origins matching pattern when credentials are enabled
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/**", config); // Apply to all routes
         return source;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // not needed for a stateless token-based API
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public: registration and login only
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/users/register").permitAll()
-
-                        // Everything else requires a valid token.
-                        // Add new modules' routes here as PROTECTED by
-                        // default -- do not add permitAll() for new
-                        // controllers unless there's a specific reason.
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
