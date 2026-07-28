@@ -31,9 +31,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        // No token, or not a Bearer token -- let the request through
-        // as unauthenticated. SecurityConfig decides whether this
-        // specific route requires auth or not.
+        //  let the request through
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -45,14 +43,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             email = jwtService.extractEmail(token);
         } catch (Exception e) {
-            // Malformed/expired/invalid token -- treat as unauthenticated
-            // rather than throwing, so SecurityConfig's rules (401 vs
-            // public route) decide the outcome, not this filter
+           // invalid token -- treat as unauthenticated
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Only set the context if nobody's already authenticated this
+
         // request, avoids redundant work
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
