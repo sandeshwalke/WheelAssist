@@ -9,7 +9,9 @@ import com.svs.wheel_assist.entity.Vehicle;
 import com.svs.wheel_assist.entity.WorkOrder;
 import com.svs.wheel_assist.enums.Role;
 import com.svs.wheel_assist.enums.WorkorderStatus;
+import com.svs.wheel_assist.repo.JobCardRepository;
 import com.svs.wheel_assist.repo.MechanicRepository;
+import com.svs.wheel_assist.repo.PartRepository;
 import com.svs.wheel_assist.repo.UserRepository;
 import com.svs.wheel_assist.repo.VehicleRepository;
 import com.svs.wheel_assist.repo.WorkorderRepository;
@@ -32,6 +34,8 @@ public class WorkorderServiceImpl implements WorkorderService {
     private final VehicleRepository vehicleRepository;
     private final MechanicRepository mechanicRepository;
     private final UserRepository userRepository;
+    private final JobCardRepository jobCardRepository;
+    private final PartRepository partRepository;
 
     @Override
     @Transactional
@@ -174,6 +178,32 @@ public class WorkorderServiceImpl implements WorkorderService {
         workOrder.setStatus(dto.getStatus());
         workOrder = workorderRepository.save(workOrder);
         return toResponseDTO(workOrder);
+    }
+
+    @Override
+    @Transactional
+    public void deleteWorkorder(Long workorderId) {
+        User caller = getAuthenticatedUser();
+
+        WorkOrder workOrder = workorderRepository.findById(workorderId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Workorder not found with id: " + workorderId));
+
+        boolean isOwner = workOrder.getVehicle().getUser().getUserId().equals(caller.getUserId());
+        boolean isMechanic = caller.getRole() == Role.MECHANIC;
+        boolean isAdmin = caller.getRole() == Role.ADMIN;
+
+        if (!isOwner && !isMechanic && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to delete this workorder");
+        }
+
+        // Clean up linked JobCard and Parts if present
+        jobCardRepository.findByWorkorderWorkorderId(workorderId).ifPresent(jobCard -> {
+            partRepository.deleteAll(partRepository.findByJobCardJobId(jobCard.getJobId()));
+            jobCardRepository.delete(jobCard);
+        });
+
+        workorderRepository.delete(workOrder);
     }
 
     private void validateStatusTransition(WorkorderStatus current, WorkorderStatus next) {

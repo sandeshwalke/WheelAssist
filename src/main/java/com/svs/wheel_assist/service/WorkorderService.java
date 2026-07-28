@@ -32,4 +32,6 @@ public interface WorkorderService {
     // Only the mechanic already assigned to this workorder may
     // progress its status
     WorkorderResponseDTO updateStatus(Long workorderId, WorkorderStatusDTO dto);
+
+    void deleteWorkorder(Long workorderId);
 }
