@@ -76,7 +76,6 @@ public class PartServiceImpl implements PartService {
     }
 
     // Shared ownership check: the caller must be the mechanic
-    // assigned to the workorder this job card belongs to
     private void checkMechanicOwnsJobCard(JobCard jobCard, User caller) {
         WorkOrder workOrder = jobCard.getWorkorder();
         if (workOrder.getMechanic() == null
@@ -85,11 +84,6 @@ public class PartServiceImpl implements PartService {
         }
     }
 
-    private User getAuthenticatedUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
-    }
 
     private PartResponseDTO toResponseDTO(Part part) {
         return PartResponseDTO.builder()
@@ -100,5 +94,11 @@ public class PartServiceImpl implements PartService {
                 .unitPrice(part.getUnitPrice())
                 .lineTotal(part.getUnitPrice().multiply(BigDecimal.valueOf(part.getQuantity())))
                 .build();
+    }
+    
+    private User getAuthenticatedUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
     }
 }
