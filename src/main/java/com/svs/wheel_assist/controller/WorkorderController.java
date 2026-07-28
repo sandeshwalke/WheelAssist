@@ -70,7 +70,7 @@ public class WorkorderController {
         return ResponseEntity.ok(workorderService.assignToSelf(workorderId));
     }
 
-    @DeleteMapping("/{workorderId}")
+    @DeleteMapping("/delete/{workorderId}")
     public ResponseEntity<Void> deleteWorkorder(@PathVariable Long workorderId)
     {
         workorderService.deleteWorkorder(workorderId);
