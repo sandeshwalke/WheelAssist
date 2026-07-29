@@ -1,6 +1,7 @@
 package com.svs.wheel_assist.controller;
 
 import com.svs.wheel_assist.dto.request.RegisterDTO;
+import com.svs.wheel_assist.dto.request.UserUpdateDTO;
 import com.svs.wheel_assist.dto.response.UserResponseDTO;
 import com.svs.wheel_assist.service.UserService;
 import jakarta.validation.Valid;
@@ -32,5 +33,16 @@ public class UserController {
     @GetMapping("/getall")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId, @Valid @RequestBody UserUpdateDTO dto) {
+        return ResponseEntity.ok(userService.updateUser(userId, dto));
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
 }
