@@ -1,6 +1,7 @@
 package com.svs.wheel_assist.service.impli;
 
 import com.svs.wheel_assist.dto.request.RegisterDTO;
+import com.svs.wheel_assist.dto.request.UserUpdateDTO;
 import com.svs.wheel_assist.dto.response.UserResponseDTO;
 import com.svs.wheel_assist.entity.Mechanic;
 import com.svs.wheel_assist.entity.User;
@@ -30,10 +31,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponseDTO register(RegisterDTO dto) {
 
-        if (dto.getRole() == Role.ADMIN) {
-            throw new IllegalArgumentException("Cannot self-register as ADMIN");
-        }
-
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Email already registered");
         }
@@ -46,7 +43,7 @@ public class UserServiceImpl implements UserService {
                 .name(dto.getName())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword())) // hashed now, not plain text
+                .password(passwordEncoder.encode(dto.getPassword()))
                 .role(dto.getRole())
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -57,21 +54,16 @@ public class UserServiceImpl implements UserService {
         String specialization = null;
 
         if (dto.getRole() == Role.MECHANIC) {
-            if (dto.getExperience() == null || dto.getExperience().isBlank()
-                    || dto.getSpecialization() == null || dto.getSpecialization().isBlank()) {
-                throw new IllegalArgumentException(
-                        "Experience and specialization are required for mechanic registration");
-            }
+            experience = dto.getExperience() != null ? dto.getExperience() : "General";
+            specialization = dto.getSpecialization() != null ? dto.getSpecialization() : "Auto Maintenance";
 
             Mechanic mechanic = Mechanic.builder()
                     .user(user)
-                    .experience(dto.getExperience())
-                    .specialization(dto.getSpecialization())
+                    .experience(experience)
+                    .specialization(specialization)
                     .build();
 
             mechanicRepository.save(mechanic);
-            experience = dto.getExperience();
-            specialization = dto.getSpecialization();
         }
 
         return toResponseDTO(user, experience, specialization);
@@ -91,6 +83,53 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(user -> toResponseDTO(user, null, null))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDTO updateUser(Long userId, UserUpdateDTO dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        user.setName(dto.getName());
+        user.setPhone(dto.getPhone());
+        user.setEmail(dto.getEmail());
+
+        Role previousRole = user.getRole();
+        user.setRole(dto.getRole());
+        user = userRepository.save(user);
+
+        String experience = dto.getExperience();
+        String specialization = dto.getSpecialization();
+
+        if (dto.getRole() == Role.MECHANIC) {
+            Mechanic mechanic = mechanicRepository.findByUserUserId(userId).orElse(null);
+            if (mechanic == null) {
+                mechanic = Mechanic.builder()
+                        .user(user)
+                        .experience(experience != null ? experience : "General")
+                        .specialization(specialization != null ? specialization : "General Repairs")
+                        .build();
+            } else {
+                if (experience != null) mechanic.setExperience(experience);
+                if (specialization != null) mechanic.setSpecialization(specialization);
+            }
+            mechanicRepository.save(mechanic);
+        } else if (previousRole == Role.MECHANIC) {
+            mechanicRepository.findByUserUserId(userId).ifPresent(mechanicRepository::delete);
+        }
+
+        return toResponseDTO(user, experience, specialization);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        mechanicRepository.findByUserUserId(userId).ifPresent(mechanicRepository::delete);
+        userRepository.delete(user);
     }
 
     private UserResponseDTO toResponseDTO(User user, String experience, String specialization) {
