@@ -88,12 +88,27 @@ export const vehicleApi = {
   }),
 };
 
+// User APIs
+export const userApi = {
+  getAll: () => request('/users/getall'),
+  getById: (userId) => request(`/users/${userId}`),
+  update: (userId, userData) => request(`/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(userData),
+  }),
+  delete: (userId) => request(`/users/${userId}`, {
+    method: 'DELETE',
+  }),
+};
+
 // Work Orders APIs
 export const workorderApi = {
   create: (workorderData) => request('/workorders/add', {
     method: 'POST',
     body: JSON.stringify(workorderData),
   }),
+
+  getAll: () => request('/workorders/getall'),
 
   getByUser: (userId) => request(`/workorders/user/${userId}`),
 
@@ -108,6 +123,10 @@ export const workorderApi = {
   updateStatus: (workorderId, status) => request(`/workorders/${workorderId}/status`, {
     method: 'PUT',
     body: JSON.stringify({ status }),
+  }),
+
+  delete: (workorderId) => request(`/workorders/${workorderId}`, {
+    method: 'DELETE',
   }),
 };
 
@@ -139,3 +158,30 @@ export const partApi = {
     method: 'DELETE',
   }),
 };
+
+// Invoice APIs
+export const invoiceApi = {
+  generate: (jobId, labourCost) => request('/invoices/generate', {
+    method: 'POST',
+    body: JSON.stringify({ jobId, labourCost }),
+  }),
+
+  getById: (invoiceId) => request(`/invoices/${invoiceId}`),
+
+  getByJobCard: (jobId) => request(`/invoices/jobcard/${jobId}`),
+
+  getAll: () => request('/invoices/getall'),
+};
+
+// Payment APIs
+export const paymentApi = {
+  createOrder: (invoiceId) => request(`/payments/create-order/${invoiceId}`, {
+    method: 'POST',
+  }),
+
+  verify: (paymentVerifyData) => request('/payments/verify', {
+    method: 'POST',
+    body: JSON.stringify(paymentVerifyData),
+  }),
+};
+

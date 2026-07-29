@@ -270,18 +270,18 @@ export default function AuthPage({ onLoginSuccess }) {
                 {/* Role Selection */}
                 <div className="form-group">
                   <label className="form-label">Register As</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '0.25rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '0.25rem' }}>
                     <div
                       onClick={() => setRegRole('CUSTOMER')}
                       style={{
-                        padding: '0.75rem',
+                        padding: '0.65rem',
                         border: `2px solid ${regRole === 'CUSTOMER' ? '#FF5722' : '#E5E7EB'}`,
                         background: regRole === 'CUSTOMER' ? '#FFF3E0' : '#FFFFFF',
                         borderRadius: '10px',
                         cursor: 'pointer',
                         textAlign: 'center',
                         fontWeight: 600,
-                        fontSize: '0.9rem',
+                        fontSize: '0.85rem',
                         color: regRole === 'CUSTOMER' ? '#C2410C' : '#4B5563'
                       }}
                     >
@@ -290,18 +290,34 @@ export default function AuthPage({ onLoginSuccess }) {
                     <div
                       onClick={() => setRegRole('MECHANIC')}
                       style={{
-                        padding: '0.75rem',
+                        padding: '0.65rem',
                         border: `2px solid ${regRole === 'MECHANIC' ? '#FF5722' : '#E5E7EB'}`,
                         background: regRole === 'MECHANIC' ? '#FFF3E0' : '#FFFFFF',
                         borderRadius: '10px',
                         cursor: 'pointer',
                         textAlign: 'center',
                         fontWeight: 600,
-                        fontSize: '0.9rem',
+                        fontSize: '0.85rem',
                         color: regRole === 'MECHANIC' ? '#C2410C' : '#4B5563'
                       }}
                     >
                       Mechanic
+                    </div>
+                    <div
+                      onClick={() => setRegRole('ADMIN')}
+                      style={{
+                        padding: '0.65rem',
+                        border: `2px solid ${regRole === 'ADMIN' ? '#FF5722' : '#E5E7EB'}`,
+                        background: regRole === 'ADMIN' ? '#FFF3E0' : '#FFFFFF',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        color: regRole === 'ADMIN' ? '#C2410C' : '#4B5563'
+                      }}
+                    >
+                      Admin
                     </div>
                   </div>
                 </div>

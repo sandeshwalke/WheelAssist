@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Save, FileText, Wrench, AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
-import { workorderApi, jobCardApi, partApi } from '../services/api';
+import { Package, Plus, Trash2, Save, FileText, Wrench, AlertCircle, CheckCircle2, RefreshCw, Receipt } from 'lucide-react';
+import { workorderApi, jobCardApi, partApi, invoiceApi } from '../services/api';
+import InvoiceModal from './InvoiceModal';
 
 export default function MechanicJobCardManager({ auth, selectedWorkorder: initialWorkorder }) {
   const mechanicId = auth?.mechanicId || auth?.userId;
@@ -8,6 +9,7 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
   const [assignedOrders, setAssignedOrders] = useState([]);
   const [selectedWoId, setSelectedWoId] = useState(initialWorkorder?.workorderId || '');
   const [currentJobCard, setCurrentJobCard] = useState(null);
+  const [invoice, setInvoice] = useState(null);
 
   // Job Card Edit Form
   const [workDone, setWorkDone] = useState('');
@@ -22,6 +24,8 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
   const [loading, setLoading] = useState(false);
   const [savingJob, setSavingJob] = useState(false);
   const [addingPart, setAddingPart] = useState(false);
+  const [generatingInvoice, setGeneratingInvoice] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -47,6 +51,7 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
     setLoading(true);
     setError('');
     setCurrentJobCard(null);
+    setInvoice(null);
     try {
       let jc = await jobCardApi.getByWorkorder(workorderId).catch(() => null);
 
@@ -58,10 +63,34 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
       setCurrentJobCard(jc);
       setWorkDone(jc.workDone || '');
       setEstimatedCost(jc.estimatedCost || '');
+
+      // Check if invoice exists for this job card
+      if (jc && jc.jobId) {
+        const inv = await invoiceApi.getByJobCard(jc.jobId).catch(() => null);
+        setInvoice(inv);
+      }
     } catch (err) {
       setError(err.message || 'Failed to load/create Job Card');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateInvoice = async () => {
+    if (!currentJobCard) return;
+    setGeneratingInvoice(true);
+    setError('');
+    setSuccess('');
+    try {
+      const laborCost = estimatedCost ? parseFloat(estimatedCost) : 0;
+      const inv = await invoiceApi.generate(currentJobCard.jobId, laborCost);
+      setInvoice(inv);
+      setSuccess('Official Tax Invoice generated!');
+      setShowInvoiceModal(true);
+    } catch (err) {
+      setError(err.message || 'Failed to generate invoice. Make sure workorder is COMPLETED.');
+    } finally {
+      setGeneratingInvoice(false);
     }
   };
 
@@ -353,7 +382,7 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
             )}
 
             {/* Total Summary Box */}
-            <div style={{ background: '#111827', color: '#FFFFFF', padding: '1.25rem', borderRadius: '12px' }}>
+            <div style={{ background: '#111827', color: '#FFFFFF', padding: '1.25rem', borderRadius: '12px', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: '#D1D5DB' }}>
                 <span>Parts Subtotal:</span>
                 <span>₹{partsGrandTotal.toFixed(2)}</span>
@@ -368,8 +397,58 @@ export default function MechanicJobCardManager({ auth, selectedWorkorder: initia
               </div>
             </div>
 
+            {/* Official Tax Invoice Action Box */}
+            <div style={{ background: '#FFF3E0', padding: '1.25rem', borderRadius: '12px', border: '1px solid #FFE0B2' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <Receipt size={20} color="#FF5722" />
+                <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#111827', margin: 0 }}>
+                  Official Tax Invoice
+                </h4>
+              </div>
+
+              {invoice ? (
+                <div>
+                  <p style={{ fontSize: '0.85rem', color: '#4B5563', margin: '0 0 0.75rem 0' }}>
+                    Invoice #{invoice.invoiceId} generated. Total Payable: <strong>₹{parseFloat(invoice.totalCost).toFixed(2)}</strong> (incl 18% GST). Status: <strong style={{ color: invoice.paid ? '#10B981' : '#F59E0B' }}>{invoice.paid ? 'PAID' : 'UNPAID'}</strong>
+                  </p>
+                  <button
+                    className="btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={() => setShowInvoiceModal(true)}
+                  >
+                    <Receipt size={16} />
+                    <span>View Official Tax Invoice</span>
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ fontSize: '0.85rem', color: '#4B5563', margin: '0 0 0.75rem 0' }}>
+                    Once workorder is COMPLETED, generate the final Tax Invoice with 18% GST calculations for customer payment.
+                  </p>
+                  <button
+                    className="btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={handleGenerateInvoice}
+                    disabled={generatingInvoice}
+                  >
+                    <Receipt size={16} />
+                    <span>{generatingInvoice ? 'Generating Invoice...' : 'Generate Official Tax Invoice'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
+      )}
+
+      {/* Invoice Modal for Mechanic View */}
+      {showInvoiceModal && invoice && (
+        <InvoiceModal
+          invoice={invoice}
+          isCustomer={false}
+          onClose={() => setShowInvoiceModal(false)}
+        />
       )}
     </div>
   );

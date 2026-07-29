@@ -1,9 +1,10 @@
 import React from 'react';
-import { Wrench, Home, Car, ClipboardList, PlusCircle, UserCheck, LogOut, Package } from 'lucide-react';
+import { Wrench, Home, Car, ClipboardList, PlusCircle, UserCheck, LogOut, Package, Shield } from 'lucide-react';
 
 export default function Navbar({ auth, activeTab, setActiveTab, onLogout }) {
   const isCustomer = auth?.role === 'CUSTOMER';
   const isMechanic = auth?.role === 'MECHANIC';
+  const isAdmin = auth?.role === 'ADMIN';
 
   return (
     <header className="navbar-header">
@@ -79,6 +80,16 @@ export default function Navbar({ auth, activeTab, setActiveTab, onLogout }) {
                 <span>Job Cards & Parts</span>
               </button>
             </>
+          )}
+
+          {isAdmin && (
+            <button
+              className={`nav-tab-btn ${activeTab === 'admin-dashboard' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin-dashboard')}
+            >
+              <Shield size={18} />
+              <span>Admin Dashboard</span>
+            </button>
           )}
         </nav>
 

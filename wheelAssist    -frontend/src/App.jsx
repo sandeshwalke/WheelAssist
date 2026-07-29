@@ -7,6 +7,7 @@ import CustomerWorkOrders from './components/CustomerWorkOrders';
 import CreateWorkOrder from './components/CreateWorkOrder';
 import MechanicDashboard from './components/MechanicDashboard';
 import MechanicJobCardManager from './components/MechanicJobCardManager';
+import AdminDashboard from './components/AdminDashboard';
 import { getStoredAuth, setStoredAuth } from './services/api';
 
 export default function App() {
@@ -18,13 +19,20 @@ export default function App() {
     const saved = getStoredAuth();
     if (saved && saved.token) {
       setAuth(saved);
+      if (saved.role === 'ADMIN') {
+        setActiveTab('admin-dashboard');
+      }
     }
   }, []);
 
   const handleLoginSuccess = (authResponse) => {
     setAuth(authResponse);
     setStoredAuth(authResponse);
-    setActiveTab('home');
+    if (authResponse.role === 'ADMIN') {
+      setActiveTab('admin-dashboard');
+    } else {
+      setActiveTab('home');
+    }
   };
 
   const handleLogout = () => {
@@ -85,6 +93,11 @@ export default function App() {
             auth={auth}
             selectedWorkorder={selectedMechanicWo}
           />
+        )}
+
+        {/* ADMIN TABS */}
+        {activeTab === 'admin-dashboard' && auth.role === 'ADMIN' && (
+          <AdminDashboard auth={auth} />
         )}
       </main>
     </div>
