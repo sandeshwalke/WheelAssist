@@ -43,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             email = jwtService.extractEmail(token);
         } catch (Exception e) {
-           // invalid token -- treat as unauthenticated
+            logger.warn("JWT validation failed: " + e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }

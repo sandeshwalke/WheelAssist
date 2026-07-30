@@ -100,11 +100,37 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '750px', padding: 0, overflow: 'hidden' }}>
-        
+    <div
+      className="modal-overlay"
+      style={{ overflowY: 'auto', alignItems: 'flex-start', padding: '2rem 1rem' }}
+    >
+      <div
+        className="modal-content"
+        style={{
+          maxWidth: '750px',
+          width: '100%',
+          margin: '0 auto',
+          padding: 0,
+          overflow: 'hidden',
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+
         {/* Header */}
-        <div style={{ background: '#111827', color: '#FFFFFF', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '4px solid #FF5722' }}>
+        <div
+          style={{
+            background: '#111827',
+            color: '#FFFFFF',
+            padding: '1.25rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '4px solid #FF5722',
+            flexShrink: 0,
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ background: '#FF5722', padding: '6px', borderRadius: '8px', display: 'flex' }}>
               <FileText size={22} color="#FFFFFF" />
@@ -126,9 +152,9 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div style={{ padding: '1.5rem', maxHeight: '80vh', overflowY: 'auto' }}>
-          
+        {/* Modal Content — scrollable middle section */}
+        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, minHeight: 0 }}>
+
           {error && (
             <div className="alert-box alert-error" style={{ marginBottom: '1rem' }}>
               <AlertCircle size={18} />
@@ -242,14 +268,26 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div style={{ padding: '1rem 1.5rem', background: '#F9FAFB', borderTop: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Footer Actions — always visible, never scrolls away */}
+        <div
+          style={{
+            padding: '1rem 1.5rem',
+            background: '#F9FAFB',
+            borderTop: '1px solid #E5E7EB',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+            flexWrap: 'wrap',
+            gap: '0.75rem',
+          }}
+        >
           <button className="btn-secondary" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Printer size={16} />
             <span>Print Invoice</span>
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
             <button className="btn-secondary" onClick={onClose}>
               Close
             </button>
