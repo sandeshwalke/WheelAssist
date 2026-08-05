@@ -1,0 +1,19 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Maven
+target/
+
+# Node
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+
+# macOS
+.DS_Store
