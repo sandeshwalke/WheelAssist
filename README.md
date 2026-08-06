@@ -115,34 +115,34 @@ flowchart TB
 
 ## 📸 Screenshots
 
-> Place your screenshots in a `docs/screenshots/` folder at the repo root using the filenames below, and they'll render automatically here.
+> Place your screenshots in a `Project Docs/Screenshots/` folder at the repo root using the filenames below, and they'll render automatically here.
 
 ### Authentication
 <p align="center">
-  <img src="docs/screenshots/login.png" alt="Login page" width="600"/>
+  <img src="Project Docs/Screenshots/login.png" alt="Login page" width="600"/>
 </p>
 
 ### Customer Portal
 <table>
   <tr>
-    <td><img src="docs/screenshots/customer-dashboard.png" alt="Customer dashboard" width="400"/><br/><sub>Customer dashboard</sub></td>
-    <td><img src="docs/screenshots/work-order-status.png" alt="Work order status tracker" width="400"/><br/><sub>Live work order status tracker</sub></td>
+    <td><img src="Project Docs/Screenshots/customer-dashboard.png" alt="Customer dashboard" width="400"/><br/><sub>Customer dashboard</sub></td>
+    <td><img src="Project Docs/Screenshots/work-order-status.png" alt="Work order status tracker" width="400"/><br/><sub>Live work order status tracker</sub></td>
   </tr>
 </table>
 
 ### Mechanic Portal
 <table>
   <tr>
-    <td><img src="docs/screenshots/mechanic-dashboard.png" alt="Mechanic dashboard" width="400"/><br/><sub>Mechanic dashboard</sub></td>
-    <td><img src="docs/screenshots/job-card-parts.png" alt="Job card and parts manager" width="400"/><br/><sub>Job card & parts manager</sub></td>
+    <td><img src="Project Docs/Screenshots/mechanic-dashboard.png" alt="Mechanic dashboard" width="400"/><br/><sub>Mechanic dashboard</sub></td>
+    <td><img src="Project Docs/Screenshots/job-card-parts.png" alt="Job card and parts manager" width="400"/><br/><sub>Job card & parts manager</sub></td>
   </tr>
 </table>
 
 ### Billing & Payments
 <table>
   <tr>
-    <td><img src="docs/screenshots/invoice.png" alt="Tax invoice" width="400"/><br/><sub>GST tax invoice</sub></td>
-    <td><img src="docs/screenshots/razorpay-payment.png" alt="Razorpay checkout success" width="400"/><br/><sub>Razorpay checkout</sub></td>
+    <td><img src="Project Docs/Screenshots/invoice.png" alt="Tax invoice" width="400"/><br/><sub>GST tax invoice</sub></td>
+    <td><img src="Project Docs/Screenshots/razorpay-payment.png" alt="Razorpay checkout success" width="400"/><br/><sub>Razorpay checkout</sub></td>
   </tr>
 </table>
 
@@ -285,8 +285,8 @@ WheelAssist/
 │   └── payment-service/       # Payment microservice — Razorpay integration
 ├── WheelAssist - Frontend/    # React + Vite client
 ├── Project Docs/
-└── docs/
-    └── screenshots/           # README images
+└── Project Docs/
+    └── Screenshots/           # README images
 ```
 
 ---
@@ -304,7 +304,6 @@ WheelAssist/
 
 ## 🗺️ Roadmap
 
-- [ ] Email notifications on invoice payment
 - [ ] Centralized role-based authorization (`@PreAuthorize`)
 - [ ] Service discovery (Eureka) instead of hardcoded internal URLs
 - [ ] API Gateway as single entry point
@@ -312,4 +311,3 @@ WheelAssist/
 
 ---
 
-<p align="center">Built by <a href="https://github.com/sandeshwalke">Sandesh Walke</a></p>
