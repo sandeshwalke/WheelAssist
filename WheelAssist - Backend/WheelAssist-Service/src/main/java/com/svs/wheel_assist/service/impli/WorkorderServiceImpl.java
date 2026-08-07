@@ -9,9 +9,11 @@ import com.svs.wheel_assist.entity.Vehicle;
 import com.svs.wheel_assist.entity.WorkOrder;
 import com.svs.wheel_assist.enums.Role;
 import com.svs.wheel_assist.enums.WorkorderStatus;
+import com.svs.wheel_assist.repo.InvoiceRepository;
 import com.svs.wheel_assist.repo.JobCardRepository;
 import com.svs.wheel_assist.repo.MechanicRepository;
 import com.svs.wheel_assist.repo.PartRepository;
+import com.svs.wheel_assist.repo.PaymentRepository;
 import com.svs.wheel_assist.repo.UserRepository;
 import com.svs.wheel_assist.repo.VehicleRepository;
 import com.svs.wheel_assist.repo.WorkorderRepository;
@@ -36,6 +38,8 @@ public class WorkorderServiceImpl implements WorkorderService {
     private final UserRepository userRepository;
     private final JobCardRepository jobCardRepository;
     private final PartRepository partRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final PaymentRepository paymentRepository;
 
     @Override
     @Transactional
@@ -91,8 +95,9 @@ public class WorkorderServiceImpl implements WorkorderService {
 
         boolean isSelf = caller.getUserId().equals(userId);
         boolean isMechanic = caller.getRole() == Role.MECHANIC;
+        boolean isAdmin = caller.getRole() == Role.ADMIN;
 
-        if (!isSelf && !isMechanic) {
+        if (!isSelf && !isMechanic && !isAdmin) {
             throw new AccessDeniedException("You can only view your own workorders");
         }
 
@@ -197,8 +202,13 @@ public class WorkorderServiceImpl implements WorkorderService {
             throw new AccessDeniedException("You are not authorized to delete this workorder");
         }
 
-        // Clean up linked JobCard and Parts if present
+        // Clean up linked Invoice, Payments, JobCard, and Parts if present
+        // (Payments must go before Invoice -- Payments hold FK to invoices.invoice_id)
         jobCardRepository.findByWorkorderWorkorderId(workorderId).ifPresent(jobCard -> {
+            invoiceRepository.findByJobCardJobId(jobCard.getJobId()).ifPresent(invoice -> {
+                paymentRepository.deleteAll(paymentRepository.findByInvoiceInvoiceId(invoice.getInvoiceId()));
+                invoiceRepository.delete(invoice);
+            });
             partRepository.deleteAll(partRepository.findByJobCardJobId(jobCard.getJobId()));
             jobCardRepository.delete(jobCard);
         });

@@ -32,7 +32,7 @@ public class PartController {
         return ResponseEntity.ok(partService.getPartsByJobCard(jobId));
     }
 
-    @DeleteMapping("delete/{partId}")
+    @DeleteMapping({"/{partId}", "/delete/{partId}"})
     public ResponseEntity<Void> deletePart(@PathVariable Long partId) {
         partService.deletePart(partId);
         return ResponseEntity.noContent().build();

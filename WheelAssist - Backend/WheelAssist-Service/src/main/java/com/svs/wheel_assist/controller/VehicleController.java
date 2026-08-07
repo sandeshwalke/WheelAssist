@@ -45,7 +45,7 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.updateVehicle(vehicleId, dto));
     }
 
-    @DeleteMapping("/delete/{vehicleId}") // deletes the endtire vehicle 
+    @DeleteMapping({"/delete/{vehicleId}", "/{vehicleId}"}) // deletes the entire vehicle 
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long vehicleId) {
         vehicleService.deleteVehicle(vehicleId);
         return ResponseEntity.noContent().build();

@@ -5,13 +5,26 @@ import com.svs.wheel_assist.dto.request.UserUpdateDTO;
 import com.svs.wheel_assist.dto.response.UserResponseDTO;
 import com.svs.wheel_assist.entity.Mechanic;
 import com.svs.wheel_assist.entity.User;
+import com.svs.wheel_assist.entity.Vehicle;
+import com.svs.wheel_assist.entity.WorkOrder;
 import com.svs.wheel_assist.enums.Role;
 import com.svs.wheel_assist.enums.UserStatus;
+import com.svs.wheel_assist.enums.WorkorderStatus;
+import com.svs.wheel_assist.repo.InvoiceRepository;
+import com.svs.wheel_assist.repo.JobCardRepository;
+import com.svs.wheel_assist.repo.InvoiceRepository;
+import com.svs.wheel_assist.repo.JobCardRepository;
 import com.svs.wheel_assist.repo.MechanicRepository;
+import com.svs.wheel_assist.repo.PartRepository;
+import com.svs.wheel_assist.repo.PaymentRepository;
 import com.svs.wheel_assist.repo.UserRepository;
+import com.svs.wheel_assist.repo.VehicleRepository;
+import com.svs.wheel_assist.repo.WorkorderRepository;
 import com.svs.wheel_assist.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +38,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final MechanicRepository mechanicRepository;
+    private final VehicleRepository vehicleRepository;
+    private final WorkorderRepository workorderRepository;
+    private final JobCardRepository jobCardRepository;
+    private final PartRepository partRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final PaymentRepository paymentRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -125,10 +144,53 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long userId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User caller = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+
+        boolean isSelf = caller.getUserId().equals(userId);
+        boolean isAdmin = caller.getRole() == Role.ADMIN;
+
+        if (!isSelf && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to delete this user");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
-        mechanicRepository.findByUserUserId(userId).ifPresent(mechanicRepository::delete);
+        // If this user is a mechanic, unassign them from every work order
+        // (workorders.mechanic_id references mechanics.mechanic_id, so the
+        // Mechanic row can't be deleted while any work order still points at it)
+        // before deleting the Mechanic profile itself.
+        mechanicRepository.findByUserUserId(userId).ifPresent(mechanic -> {
+            List<WorkOrder> assignedOrders = workorderRepository.findByMechanicMechanicId(mechanic.getMechanicId());
+            for (WorkOrder wo : assignedOrders) {
+                wo.setMechanic(null);
+                workorderRepository.save(wo);
+            }
+            mechanicRepository.delete(mechanic);
+        });
+
+        // If this user owns vehicles (as a customer), cascade-delete everything
+        // hanging off each one: Payments -> Invoice -> Parts -> JobCard -> WorkOrder -> Vehicle.
+        // Same FK-ordering rule as WorkorderServiceImpl.deleteWorkorder.
+        List<Vehicle> vehicles = vehicleRepository.findByUserUserId(userId);
+        for (Vehicle vehicle : vehicles) {
+            List<WorkOrder> workOrders = workorderRepository.findByVehicleVehicleId(vehicle.getVehicleId());
+            for (WorkOrder wo : workOrders) {
+                jobCardRepository.findByWorkorderWorkorderId(wo.getWorkorderId()).ifPresent(jobCard -> {
+                    invoiceRepository.findByJobCardJobId(jobCard.getJobId()).ifPresent(invoice -> {
+                        paymentRepository.deleteAll(paymentRepository.findByInvoiceInvoiceId(invoice.getInvoiceId()));
+                        invoiceRepository.delete(invoice);
+                    });
+                    partRepository.deleteAll(partRepository.findByJobCardJobId(jobCard.getJobId()));
+                    jobCardRepository.delete(jobCard);
+                });
+                workorderRepository.delete(wo);
+            }
+            vehicleRepository.delete(vehicle);
+        }
+
         userRepository.delete(user);
     }
 

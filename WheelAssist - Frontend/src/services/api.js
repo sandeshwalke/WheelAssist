@@ -125,9 +125,9 @@ export const workorderApi = {
     body: JSON.stringify({ status }),
   }),
 
-  delete: (workorderId) => request(`/workorders/${workorderId}`, {
+delete: (workorderId) => request(`/workorders/delete/${workorderId}`, {
     method: 'DELETE',
-  }),
+}),
 };
 
 // Job Cards APIs

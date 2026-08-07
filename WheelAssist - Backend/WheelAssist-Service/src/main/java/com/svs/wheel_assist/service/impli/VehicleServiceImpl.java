@@ -4,8 +4,15 @@ import com.svs.wheel_assist.dto.request.VehicleDTO;
 import com.svs.wheel_assist.dto.response.VehicleResponseDTO;
 import com.svs.wheel_assist.entity.User;
 import com.svs.wheel_assist.entity.Vehicle;
+import com.svs.wheel_assist.entity.WorkOrder;
+import com.svs.wheel_assist.enums.Role;
+import com.svs.wheel_assist.repo.InvoiceRepository;
+import com.svs.wheel_assist.repo.JobCardRepository;
+import com.svs.wheel_assist.repo.PartRepository;
+import com.svs.wheel_assist.repo.PaymentRepository;
 import com.svs.wheel_assist.repo.UserRepository;
 import com.svs.wheel_assist.repo.VehicleRepository;
+import com.svs.wheel_assist.repo.WorkorderRepository;
 import com.svs.wheel_assist.service.VehicleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-//
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +31,11 @@ public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
+    private final WorkorderRepository workorderRepository;
+    private final JobCardRepository jobCardRepository;
+    private final PartRepository partRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final PaymentRepository paymentRepository;
 
     @Override
     @Transactional
@@ -117,10 +129,34 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional
     public void deleteVehicle(Long vehicleId) {
-        if (!vehicleRepository.existsById(vehicleId)) {
-            throw new EntityNotFoundException("Vehicle not found with id: " + vehicleId);
+        String callerEmail = getAuthenticatedEmail();
+        User caller = userRepository.findByEmail(callerEmail)
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+
+        Vehicle vehicle = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle not found with id: " + vehicleId));
+
+        boolean isOwner = vehicle.getUser().getUserId().equals(caller.getUserId());
+        boolean isAdmin = caller.getRole() == Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new AccessDeniedException("You are not authorized to delete this vehicle");
         }
-        vehicleRepository.deleteById(vehicleId);
+
+        List<WorkOrder> workOrders = workorderRepository.findByVehicleVehicleId(vehicleId);
+        for (WorkOrder wo : workOrders) {
+            jobCardRepository.findByWorkorderWorkorderId(wo.getWorkorderId()).ifPresent(jobCard -> {
+                invoiceRepository.findByJobCardJobId(jobCard.getJobId()).ifPresent(invoice -> {
+                    paymentRepository.deleteAll(paymentRepository.findByInvoiceInvoiceId(invoice.getInvoiceId()));
+                    invoiceRepository.delete(invoice);
+                });
+                partRepository.deleteAll(partRepository.findByJobCardJobId(jobCard.getJobId()));
+                jobCardRepository.delete(jobCard);
+            });
+            workorderRepository.delete(wo);
+        }
+
+        vehicleRepository.delete(vehicle);
     }
 
     private String getAuthenticatedEmail() {
