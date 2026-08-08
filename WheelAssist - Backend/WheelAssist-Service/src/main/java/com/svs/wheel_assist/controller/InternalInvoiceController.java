@@ -2,6 +2,7 @@ package com.svs.wheel_assist.controller;
 
 import com.svs.wheel_assist.repo.InvoiceRepository;
 import com.svs.wheel_assist.entity.Invoice;
+import com.svs.wheel_assist.service.EmailService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class InternalInvoiceController {
 
     private final InvoiceRepository invoiceRepository;
+    private final EmailService emailService;
 
     @PostMapping("/{invoiceId}/mark-paid")
     public ResponseEntity<Void> markPaid(@PathVariable Long invoiceId) {
@@ -29,6 +31,8 @@ public class InternalInvoiceController {
 
         invoice.setPaid(true);
         invoiceRepository.save(invoice);
+
+        emailService.sendInvoicePaidEmail(invoiceId);
 
         return ResponseEntity.ok().build();
     }

@@ -14,6 +14,7 @@ import com.svs.wheel_assist.enums.PaymentStatus;
 import com.svs.wheel_assist.repo.InvoiceRepository;
 import com.svs.wheel_assist.repo.PaymentRepository;
 import com.svs.wheel_assist.repo.UserRepository;
+import com.svs.wheel_assist.service.EmailService;
 import com.svs.wheel_assist.service.PaymentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Override
     public PaymentOrderResponseDTO createOrder(Long invoiceId) {
@@ -136,6 +138,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         invoice.setPaid(true);
         invoiceRepository.save(invoice);
+
+        emailService.sendInvoicePaidEmail(invoice.getInvoiceId());
 
         return toResponseDTO(payment);
     }

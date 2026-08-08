@@ -101,10 +101,33 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '750px', padding: 0, overflow: 'hidden' }}>
-        
+      <div
+        className="modal-content"
+        style={{
+          maxWidth: '750px',
+          width: '100%',
+          maxHeight: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 0,
+          overflow: 'hidden',
+          borderRadius: '16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+        }}
+      >
         {/* Header */}
-        <div style={{ background: '#111827', color: '#FFFFFF', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '4px solid #FF5722' }}>
+        <div
+          style={{
+            background: '#111827',
+            color: '#FFFFFF',
+            padding: '1.25rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '4px solid #FF5722',
+            flexShrink: 0,
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ background: '#FF5722', padding: '6px', borderRadius: '8px', display: 'flex' }}>
               <FileText size={22} color="#FFFFFF" />
@@ -126,9 +149,8 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div style={{ padding: '1.5rem', maxHeight: '80vh', overflowY: 'auto' }}>
-          
+        {/* Modal Scrollable Body */}
+        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
           {error && (
             <div className="alert-box alert-error" style={{ marginBottom: '1rem' }}>
               <AlertCircle size={18} />
@@ -239,11 +261,49 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
               <span>Grand Total Payable:</span>
               <span style={{ color: '#FF5722' }}>₹{totalCost.toFixed(2)}</span>
             </div>
+
+            {/* Direct Pay Action inside total box */}
+            {isCustomer && !isPaid && (
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px dashed #374151' }}>
+                <button
+                  className="btn-primary"
+                  onClick={handlePayNow}
+                  disabled={paying}
+                  style={{
+                    width: '100%',
+                    padding: '0.85rem 1.5rem',
+                    fontSize: '1.05rem',
+                    fontWeight: 800,
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.6rem',
+                    background: '#FF5722',
+                    boxShadow: '0 8px 20px rgba(255, 87, 34, 0.4)',
+                    cursor: paying ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <CreditCard size={20} />
+                  <span>{paying ? 'Processing Payment...' : `Pay ₹${totalCost.toFixed(2)} with Razorpay`}</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div style={{ padding: '1rem 1.5rem', background: '#F9FAFB', borderTop: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Sticky Footer Actions Bar */}
+        <div
+          style={{
+            padding: '1rem 1.5rem',
+            background: '#F9FAFB',
+            borderTop: '1px solid #E5E7EB',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+          }}
+        >
           <button className="btn-secondary" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Printer size={16} />
             <span>Print Invoice</span>
@@ -259,10 +319,16 @@ export default function InvoiceModal({ invoice: initialInvoice, onClose, onPayme
                 className="btn-primary"
                 onClick={handlePayNow}
                 disabled={paying}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.65rem 1.25rem' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.65rem 1.25rem',
+                  fontWeight: 700,
+                }}
               >
                 <CreditCard size={18} />
-                <span>{paying ? 'Processing Payment...' : `Pay ₹${totalCost.toFixed(2)} with Razorpay`}</span>
+                <span>{paying ? 'Processing...' : `Pay ₹${totalCost.toFixed(2)} with Razorpay`}</span>
               </button>
             )}
           </div>

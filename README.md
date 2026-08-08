@@ -4,6 +4,8 @@
 
 > Customers register vehicles and raise service requests. Mechanics pick up jobs, log parts used, and generate invoices. Payments are processed online via Razorpay, with automatic invoice status updates across services.
 
+> 📚 **Complete Viva Preparation & System Documentation Master Guide**: Read [`WheelAssist_Complete_System_Documentation_and_Viva_Master.md`](file:///c:/Users/sandesh/IdeaProjects/wheel-assist/WheelAssist_Complete_System_Documentation_and_Viva_Master.md) for step-by-step technical explanations of every file, endpoint, entity, security filter, and viva question bank.
+
 ---
 
 ## 📌 Table of Contents
@@ -44,6 +46,7 @@ The backend is split into **two independently deployable microservices** — the
 - Real-time work order status tracking (`Pending → Assigned → In Progress → Completed → Delivered`)
 - View itemized tax invoices with GST breakdown
 - Pay securely online via Razorpay (UPI, cards, netbanking)
+- Receive automated HTML Tax Invoice receipts via Email upon successful payment
 
 **Mechanic**
 - View unassigned & assigned jobs
@@ -59,6 +62,7 @@ The backend is split into **two independently deployable microservices** — the
 - Role-based dashboards (Customer / Mechanic / Admin)
 - Independent payment microservice with Razorpay signature verification
 - Automatic invoice status sync between services after payment
+- Asynchronous HTML Email dispatching (`@Async` + `@Transactional`) via JavaMailSender
 
 ---
 
@@ -68,6 +72,7 @@ The backend is split into **two independently deployable microservices** — the
 - Java 17+, Spring Boot 3
 - Spring Security + JWT (`jjwt`)
 - Spring Data JPA / Hibernate
+- Spring Mail (`spring-boot-starter-mail`, `JavaMailSender`, `MimeMessageHelper`)
 - MySQL
 - RestTemplate (inter-service communication)
 - Razorpay Java SDK
